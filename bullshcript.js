@@ -32,7 +32,7 @@ let ytplayerdisabled = true;
 		videoplayer.setAttribute("rotation", "0 0 0");
 		videoplayer.setAttribute("position", "0.002 -5 0");
 		videoplayer.setAttribute("hand-controls", "true");
-		videoplayer.setAttribute("button-position", "-18.4 1.45 -1.45");
+		videoplayer.setAttribute("button-position", "-18.4 1.2 -1.45");
 		videoplayer.setAttribute("volume", "5");
 		videoplayer.setAttribute("button-rotation", "0 0 0");
 		videoplayer.setAttribute("button-scale", "1 1 1");
@@ -64,7 +64,7 @@ function enableTheFireScreen() {
 		firescreen.setAttribute("rotation", "0 0 0");
 		firescreen.setAttribute("screen-rotation", "0 0 0");
 		firescreen.setAttribute("screen-scale", "0.515 0.515 1");
-		firescreen.setAttribute("position", "-18.2 0.9 1.451");
+		firescreen.setAttribute("position", "-18.2 0.65 1.451");
 		firescreen.setAttribute("lock-position", "true");
 		firescreen.setAttribute("mipmaps", "0");
 		firescreen.setAttribute("pixelsperunit", "1600");
@@ -78,7 +78,7 @@ function enableTheFireScreen() {
 		firescreen.setAttribute("volume", "0.2");
 		firescreen.setAttribute("width", "1920");
 		firescreen.setAttribute("height", "1080");
-		firescreen.setAttribute("screen-position", "18.2028 -5.9 -1.451");
+		firescreen.setAttribute("screen-position", "18.2028 -6.15 -1.451");
 		firescreen.setAttribute("website", websiteurl);
 		firescreen.setAttribute("src", "https://firer.at/scripts/firescreenv2.js");
 		document.querySelector("a-scene").appendChild(firescreen);
