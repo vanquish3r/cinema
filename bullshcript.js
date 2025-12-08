@@ -19,159 +19,185 @@ BS.BanterScene.GetInstance().On("loaded", () => {
 		// enableThePortableFireScreen();
 });
 
-
-// videoplayer toggle by HBR & FireRat
+// Player Toggle's by FireRat
 let ytplayerdisabled = true;
-  function enableYouTube() {
-  if (ytplayerdisabled){ ytplayerdisabled = false;
-    console.log("YouTube Player Loading");
-    const videoplayer = document.createElement("script");
-		videoplayer.id = "3dcinema-videoplayer";
-		videoplayer.setAttribute("scale", "1 1 1");
-		videoplayer.setAttribute("mip-maps", "0");
-		videoplayer.setAttribute("rotation", "0 0 0");
-		videoplayer.setAttribute("position", "0.002 -5 0");
-		videoplayer.setAttribute("hand-controls", "true");
-		videoplayer.setAttribute("button-position", "-18.4 1.2 -1.45");
-		videoplayer.setAttribute("volume", "5");
-		videoplayer.setAttribute("button-rotation", "0 0 0");
-		videoplayer.setAttribute("button-scale", "1 1 1");
-		videoplayer.setAttribute("spatial-min-distance", "1");
-		videoplayer.setAttribute("spatial-max-distance", "1000");
-		videoplayer.setAttribute("playlist", youtubePlaylist);
-		videoplayer.setAttribute("announce", "false");
-		// videoplayer.setAttribute("announce-four-twenty", "false");
-		// videoplayer.setAttribute("data-playlist-icon-url", "https://vanquish3r.github.io/cinema/images/Playlist.png");
-		// videoplayer.setAttribute("data-vol-up-icon-url", "https://vanquish3r.github.io/cinema/images/VolUp.png");
-		// videoplayer.setAttribute("data-vol-down-icon-url", "https://vanquish3r.github.io/cinema/images/VolDown.png");
-		// videoplayer.setAttribute("data-mute-icon-url", "https://vanquish3r.github.io/cinema/images/Mute.png");
-		// videoplayer.setAttribute("data-skip-forward-icon-url", "https://vanquish3r.github.io/cinema/images/Forward.png");
-		// videoplayer.setAttribute("data-skip-backward-icon-url", "https://vanquish3r.github.io/cinema/images/Backwardsd.png");
-		videoplayer.setAttribute("src", "https://vidya.firer.at/playlist.js"); // https://vidya.sdq.st/playlist.js
-    document.querySelector("a-scene").appendChild(videoplayer);
+let karaokeplayerdisabled = true;
+let screenstuffDisabled = true;
+
+/////////////// RENDER SCRIPT LOADER STUFF ///////////////
+async function injectRenderScript(theScriptsURL, TheScriptsName = "UnNamed", attributes = {}, appendTo = document.body) {
+  const scriptUrl = theScriptsURL;
+  try { // 1. "Warm-up" request: Ping the server to wake it up.
+    console.log("Waking up the server...");
+    await fetch(scriptUrl, { method: 'HEAD', mode: 'no-cors' }); // We use { method: 'HEAD' } to be more efficient.
+    console.log("Server is awake! Injecting script..."); // We only need to know the server is awake, not download the whole script yet.
+    const script = document.createElement("script"); // 2. Inject the script now that the server is ready.
+    script.id = `${TheScriptsName}`;
+    script.setAttribute("src", scriptUrl); // Set the src attribute
+    Object.entries(attributes).forEach(([key, value]) => { script.setAttribute(key, value); }); // Set all custom attributes
+    appendTo.appendChild(script);
+    script.onload = () => { console.log(`${TheScriptsName} script loaded successfully!`); }; // Set up event handlers
+    script.onerror = () => { console.error(`Failed to load the ${TheScriptsName} script.`); };
+  } catch (error) { // The fetch itself might fail, though 'no-cors' mode often prevents this.
+    console.error("The warm-up request failed. The script might not load.", error); // The real check is the script's onerror handler.
+  }
+}
+
+// YouTube player toggle
+async function enableYouTube() {
+	// If Browser already exists, DESTROY IT!
+	var browser = await BS.BanterScene.GetInstance().Find('MainParentObject2');
+	if (browser) { console.log("Browser2 Found, Removing it!"); cleanupFireScreenV2(2); screenstuffDisabled = true; }
+	// If Karaoke Player exists, Destroy it!
+	let delayYT = false;
+	if (window.karaokePlayerInstance) { delayYT = true; karaokeplayerdisabled = true; console.log("Karaoke Player exists, Destroying it!"); window.cleanupVideoPlayer(); }
+	if (ytplayerdisabled){ ytplayerdisabled = false;
+		setTimeout(() => {  
+			console.log("YouTube Player Loading");
+
+			const youtubeAttributes = {
+				"scale": "1 1 1",
+				"mip-maps": "0",
+				"rotation": "0 0 0",
+				"position": "0.002 -5 0",
+				"hand-controls": "true",
+				"button-position": "-0.15 1.159 30.156",
+				"volume": "5",
+				"button-rotation": "0 0 0",
+				"button-scale": "0.3 0.3 0.3",
+				"spatial": "false",
+				// "spatial-min-distance": "1",
+				// "spatial-max-distance": "1000",
+				"playlist": youtubePlaylist,
+				"announce": "false",
+				"instance": "3dcinema-vidyainstance",
+				"announce-events": "false",
+				"announce-four-twenty": "false"
+			};
+
+			injectRenderScript(
+				"https://vidya.firer.at/playlist.js", // firer.at / sdq.st
+				"3dcinema-videoplayer", youtubeAttributes, document.querySelector("a-scene")
+			);
+
+		}, delayYT ? 2000 : 0);
   } else {console.log("YouTube Player Loading...");}
 };
 
 // Fire Screen Toggle
-let screenstuffDisabled = true;
 function enableTheFireScreen() {
-  if (screenstuffDisabled){
-		screenstuffDisabled = false;
-		console.log("Adding Screen Cast");
-		const firescreen = document.createElement("script");
-		firescreen.id = "cannabanter-firescreen";
-		firescreen.setAttribute("scale", "1 1 1");
-		firescreen.setAttribute("rotation", "0 0 0");
-		firescreen.setAttribute("screen-rotation", "0 0 0");
-		firescreen.setAttribute("screen-scale", "0.515 0.515 1");
-		firescreen.setAttribute("position", "-18.2 0.6 1.451");
-		firescreen.setAttribute("lock-position", "true");
-		firescreen.setAttribute("mipmaps", "0");
-		firescreen.setAttribute("pixelsperunit", "1600");
-		firescreen.setAttribute("castmode", "true");
-		firescreen.setAttribute("backdrop", "false");
-		firescreen.setAttribute("disable-rotation", "true");
-		firescreen.setAttribute("hand-controls", "false");
-		firescreen.setAttribute("announce", "false");
-		firescreen.setAttribute("announce-events", "false");
-		firescreen.setAttribute("announce-420", "false");
-		firescreen.setAttribute("volume", "0.2");
-		firescreen.setAttribute("width", "1920");
-		firescreen.setAttribute("height", "1080");
-		firescreen.setAttribute("screen-position", "18.2028 -5.6 -1.451");
-		firescreen.setAttribute("website", websiteurl);
-		firescreen.setAttribute("src", "https://firer.at/scripts/firescreenv2.js");
-		document.querySelector("a-scene").appendChild(firescreen);
-		if (websiteurl.includes("hyperbeam.com/i/")) {
-			setTimeout(async () => { 
-				let theBrowserthingy = await cannascene.Find(`MyBrowser1`);
-				let thebrowserpart = theBrowserthingy.GetComponent(BS.ComponentType.BanterBrowser);
-				thebrowserpart.RunActions(JSON.stringify({"actions": [{ "actionType": "runscript","strparam1": "const checkbox = document.querySelector(`.p-checkbox-box[role='checkbox']`); const joinButton = document.querySelector('.footer_3Yiou .joinBtn_1TAU6'); if (checkbox) checkbox.click(); if (joinButton) { const observer = new MutationObserver(() => { if (!joinButton.classList.contains('p-disabled')) { joinButton.click(); observer.disconnect(); setTimeout(() => { const skipButton = document.querySelector('.dialog-secondary-btn'); if (skipButton) skipButton.click(); }, 3000); } }); observer.observe(joinButton, { attributes: true, attributeFilter: ['class'] }); }" }]}));
-				setTimeout(async () => {
-					thebrowserpart.RunActions(JSON.stringify({"actions": [{ "actionType": "runscript","strparam1": "var fullscreenButton = document.querySelector(`.p-button.p-component.tu-button.btn-tertiary.btn_2YRyp svg path[d^='M3 3h6.429']`); if (fullscreenButton) { fullscreenButton.closest('button').click(); } setTimeout(async () => { var chatButton = document.querySelector(`.p-button.p-component.tu-button.btn-tertiary.fsChatBtn_2cCyy svg path[d^='M22 22h-2V2h2v20zM2 11h12.17']`); if (chatButton) { chatButton.closest('button').click(); } }, 3500);" }]}));
-				}, 5000);
-			}, 3000);
+	// If Karaoke Player exists, Destroy it!
+	if (window.karaokePlayerInstance) { karaokeplayerdisabled = true; console.log("Karaoke Player exists, Destroying it!"); window.cleanupVideoPlayer(); }
+	// If YouTube Player exists, Destroy it!
+	if (window.playlistPlayerInstance) { ytplayerdisabled = true; console.log("YouTube Player exists, Destroying it!"); window.cleanupVideoPlayer(); }
+	setTimeout(() => { 
+		if (screenstuffDisabled){
+			screenstuffDisabled = false;
+			console.log("Adding Screen Cast");
+			const firescreenAttributes = {
+				"scale": "1 1 1",
+				"mipmaps": "0",
+				"rotation": "0 0 0",
+				"screen-rotation": "0 0 0",
+				"screen-scale": "0.515 0.515 1",
+				"position": "-18.2 0.6 1.451",
+				"lock-position": "true",
+				"hand-controls": "true",
+				"pixelsperunit": "1600",
+				"castmode": "true",
+				"backdrop": "false",
+				"disable-rotation": "true",
+				"announce": "false",
+				"announce-events": "false",
+				"announce-420": "false",
+				"volume": "0.2",
+				"width": "1920",
+				"height": "1080",
+				"screen-position": "18.2028 -5.6 -1.451",
+				"website": websiteurl
+			};
+			const firescreen = document.createElement("script");
+			firescreen.id = "3dcinema-firescreen";
+			firescreen.setAttribute("src", "https://firer.at/scripts/firescreenv2.js");
+			Object.entries(firescreenAttributes).forEach(([key, value]) => { firescreen.setAttribute(key, value); });
+			document.querySelector("a-scene").appendChild(firescreen);
+			if (websiteurl.includes("hyperbeam.com/i/")) {
+				setTimeout(async () => { 
+					let theBrowserthingy = await BS.BanterScene.GetInstance().Find(`MyBrowser2`);
+					let thebrowserpart = theBrowserthingy.GetComponent(BS.ComponentType.BanterBrowser);
+					thebrowserpart.RunActions(JSON.stringify({"actions": [{ "actionType": "runscript","strparam1": "const checkbox = document.querySelector(`.p-checkbox-box[role='checkbox']`); const joinButton = document.querySelector('.footer_3Yiou .joinBtn_1TAU6'); if (checkbox) checkbox.click(); if (joinButton) { const observer = new MutationObserver(() => { if (!joinButton.classList.contains('p-disabled')) { joinButton.click(); observer.disconnect(); setTimeout(() => { const skipButton = document.querySelector('.dialog-secondary-btn'); if (skipButton) skipButton.click(); }, 3000); } }); observer.observe(joinButton, { attributes: true, attributeFilter: ['class'] }); }" }]}));
+					setTimeout(async () => {
+						thebrowserpart.RunActions(JSON.stringify({"actions": [{ "actionType": "runscript","strparam1": "var fullscreenButton = document.querySelector(`.p-button.p-component.tu-button.btn-tertiary.btn_2YRyp svg path[d^='M3 3h6.429']`); if (fullscreenButton) { fullscreenButton.closest('button').click(); } setTimeout(async () => { var chatButton = document.querySelector(`.p-button.p-component.tu-button.btn-tertiary.fsChatBtn_2cCyy svg path[d^='M22 22h-2V2h2v20zM2 11h12.17']`); if (chatButton) { chatButton.closest('button').click(); } }, 3500);" }]}));
+					}, 5000);
+				}, 500);
+			}
 		}
-  }
+	}, 3000); 
 	console.log("Screen Stuff enabled: " + screenstuffDisabled);
 };
 
 // Fire Tablet
 let screenPortableDisabled = true;
-function enableThePortableFireScreen() {
+function enableThePortableFireScreen(announce = false) {
   if (screenPortableDisabled){ screenPortableDisabled = false;
-   setTimeout(() => { 
-	console.log("Adding Fire Tablet");
-	const firescreen = document.createElement("script");
-	firescreen.id = "3dcinema-portable-firescreen";
-	firescreen.setAttribute("scale", "0.7 0.7 1");
-	firescreen.setAttribute("rotation", "0 0 0");
-	firescreen.setAttribute("position", "-16.45 1.269 0.75");
-	firescreen.setAttribute("mipmaps", "0");
-	firescreen.setAttribute("pixelsperunit", "1200");
-	firescreen.setAttribute("width", "1280");
-	firescreen.setAttribute("height", "720");
-	firescreen.setAttribute("announce", "false");
-	firescreen.setAttribute("announce-events", "true");
-	firescreen.setAttribute("volume", "0");
-   	firescreen.setAttribute("backdrop", "true");
-	firescreen.setAttribute("hand-controls", "true");
-	firescreen.setAttribute("custom-button01-url", "https://jackbox.tv");
-	firescreen.setAttribute("custom-button01-text", "Jackbox.tv");
-	firescreen.setAttribute("custom-button02-url", "https://papas.tv");
-	firescreen.setAttribute("custom-button02-text", "Papas.tv");
-	firescreen.setAttribute("custom-button03-url", "https://songpop-party.com/join");
-	firescreen.setAttribute("custom-button03-text", "SongPop Party");	   
-	firescreen.setAttribute("custom-button04-url", "https://firer.at/pages/scuffeduno.html");
-	firescreen.setAttribute("custom-button04-text", "ScuffedUNO");   
-	firescreen.setAttribute("custom-button05-url", "https://paperpirat.es/");
-	firescreen.setAttribute("custom-button05-text", "PaperPirat.es");
-	firescreen.setAttribute("website", otherwebsiteurl);
-	firescreen.setAttribute("src", "https://firer.at/scripts/firescreenv2.js");
-	document.querySelector("a-scene").appendChild(firescreen);
-   }, 5000); 
-  }
-    console.log("Fire Tablet enabled");
-
+		console.log("Adding Fire Tablet");
+		const firescreenAttributes = {
+			"scale": "0.7 0.7 1",
+			"mipmaps": "0",
+			"rotation": "0 0 0",
+			"position": "-16.45 1.269 0.75",
+			"pixelsperunit": "1200",
+			"width": "1280",
+			"height": "720",
+			"announce": announce,
+			"announce-events": announce,
+			"announce-420": announce,
+			"volume": "0.25",
+			"backdrop": "true",
+			"hand-controls": "true",
+			"custom-button01-url": "https://jackbox.tv",
+			"custom-button01-text": "Jackbox.tv",
+			"custom-button02-url": "https://papas.tv",
+			"custom-button02-text": "Papas.tv",
+			"custom-button03-url": "https://songpop-party.com/join",
+			"custom-button03-text": "SongPop Party",
+			"custom-button04-url": "https://paperpirat.es/",
+			"custom-button04-text": "PaperPirat.es",
+			"custom-button05-url": "https://firer.at/pages/scuffeduno.html",
+			"custom-button05-text": "ScuffedUNO",
+			"website": otherwebsiteurl
+		};
+		const firescreen = document.createElement("script");
+		firescreen.id = "cannabanter-firetablet";
+		firescreen.setAttribute("src", "https://firer.at/scripts/firescreenv2.js");
+		Object.entries(firescreenAttributes).forEach(([key, value]) => { firescreen.setAttribute(key, value); });
+		document.querySelector("a-scene").appendChild(firescreen);
+  }; console.log("Fire Tablet enabled");
 };
 
 // BobCast Home Button Auto Play
 document.addEventListener('CustomButtonClick', async function(event) {
- // console.log('--- 1 Detected a Button Click event in another script! ---');
- // console.log('Button Name:', event.detail.buttonName);
- // console.log('Detail:', event.detail);
- // console.log('Message:', event.detail.message);
- // console.log('Timestamp:', event.detail.timestamp);
+ // console.log('--- 1 Detected a Button Click event in another script! ---'); console.log('Button Name:', event.detail.buttonName);
+ // console.log('Detail:', event.detail); console.log('Message:', event.detail.message); console.log('Timestamp:', event.detail.timestamp);
   switch (event.detail.buttonName) {
     case 'Home':
      // console.log('Handling action for: Primary Action Button HOME HOME');
       if (String(event.detail.message).includes("embed/video")) {
       // console.log('HOME IS watch.owncast.online');
         setTimeout(async () => { 
-          (await BS.BanterScene.GetInstance().Find(`MyBrowser1`)).GetComponent(BS.ComponentType.BanterBrowser).RunActions(JSON.stringify({
-          actions: [
-            {
-              actionType: "runscript",
-              strparam1: `document.querySelector('[title="Play Video"]').click();`
-            },
-            {
-              actionType: "keypress",
-              strparam1: "f"
-            }
-          ]
-        }));
+          (await BS.BanterScene.GetInstance().Find(`MyBrowser1`)).GetComponent(BS.ComponentType.BanterBrowser).RunActions(JSON.stringify({ actions: [
+            { actionType: "runscript", strparam1: `document.querySelector('[title="Play Video"]').click();` },
+            { actionType: "keypress", strparam1: "f" } ]
+        	}));
         }, 2000);
-      } else {
-       // console.log(`HOME IS NOT watch.owncast.online`, event.detail.message);
+      } else { // console.log(`HOME IS NOT watch.owncast.online`, event.detail.message);
       };
       break;
     case 'Info':
-     // console.log('Handling action for: More Info Button');
-      // Do something specific for button 2
+     // console.log('Handling action for: More Info Button'); // Do something specific for button 2
       break;
     case 'Google':
-     // console.log('Handling action for: Google Button');
-      // Do something specific for button 3
+     // console.log('Handling action for: Google Button'); // Do something specific for button 3
       break;
     default:
      // console.log('An unknown button triggered the custom event.');
