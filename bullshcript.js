@@ -70,7 +70,7 @@ async function enableYouTube() {
 				// "spatial-max-distance": "1000",
 				"playlist": youtubePlaylist,
 				"announce": "false",
-				"instance": "3dcinema-vidyainstance",
+				// "instance": "3dcinema-vidyainstance",
 				"announce-events": "false",
 				"announce-four-twenty": "false"
 			};
