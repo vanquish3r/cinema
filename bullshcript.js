@@ -175,31 +175,71 @@ function enableThePortableFireScreen(announce = false) {
   }; console.log("Fire Tablet enabled");
 };
 
-// BobCast Home Button Auto Play
+// BobCast Home Button Auto Play, SideQuest Stream Home Button Fullscreen and Unmute
 document.addEventListener('CustomButtonClick', async function(event) {
- // console.log('--- 1 Detected a Button Click event in another script! ---'); console.log('Button Name:', event.detail.buttonName);
- // console.log('Detail:', event.detail); console.log('Message:', event.detail.message); console.log('Timestamp:', event.detail.timestamp);
-  switch (event.detail.buttonName) {
-    case 'Home':
-     // console.log('Handling action for: Primary Action Button HOME HOME');
-      if (String(event.detail.message).includes("embed/video")) {
-      // console.log('HOME IS watch.owncast.online');
-        setTimeout(async () => { 
-          (await BS.BanterScene.GetInstance().Find(`MyBrowser1`)).GetComponent(BS.ComponentType.BanterBrowser).RunActions(JSON.stringify({ actions: [
-            { actionType: "runscript", strparam1: `document.querySelector('[title="Play Video"]').click();` },
-            { actionType: "keypress", strparam1: "f" } ]
-        	}));
-        }, 2000);
-      } else { // console.log(`HOME IS NOT watch.owncast.online`, event.detail.message);
-      };
-      break;
-    case 'Info':
-     // console.log('Handling action for: More Info Button'); // Do something specific for button 2
-      break;
-    case 'Google':
-     // console.log('Handling action for: Google Button'); // Do something specific for button 3
-      break;
-    default:
-     // console.log('An unknown button triggered the custom event.');
-  }
+    // console.log('--- Detected a Button Click event! ---', event.detail.buttonName);
+
+    switch (event.detail.buttonName) {
+        case 'Home':
+            const message = String(event.detail.message);
+
+            // --- Existing Logic: Owncast ---
+            if (message.includes("embed/video")) {
+                setTimeout(async () => {
+                    (await BS.BanterScene.GetInstance().Find(`MyBrowser2`)).GetComponent(BS.ComponentType.BanterBrowser).RunActions(JSON.stringify({
+                        actions: [
+                            { actionType: "runscript", strparam1: `document.querySelector('[title="Play Video"]').click();` },
+                            { actionType: "keypress", strparam1: "f" }
+                        ]
+                    }));
+                }, 2000);
+
+            // --- New Logic: SideQuest VR Stream (With Timeout) ---
+            } else if (message.includes("sidequestvr.com/stream/view")) {
+                
+                setTimeout(async () => {
+                    // Define the script to inject
+                    const fullscreenAndUnmute = `
+                        var wrapper = document.querySelector('.stream-video__wrapper');
+                        if (wrapper) {
+                            document.body.appendChild(wrapper);
+                            wrapper.style.cssText = 'position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; z-index:2147483647 !important; background:black !important; display:flex !important; align-items:center !important; justify-content:center !important;';
+                            
+                            var vid = wrapper.querySelector('video');
+                            if(vid) { 
+                                vid.style.width = '100%'; 
+                                vid.style.height = '100%'; 
+                                vid.style.objectFit = 'contain'; 
+                                
+                                vid.muted = false;
+                                vid.volume = 1.0;
+                            }
+                        }
+                    `;
+
+                    // Execute the action on MyBrowser2
+                    const browser = await BS.BanterScene.GetInstance().Find(`MyBrowser2`);
+                    browser.GetComponent(BS.ComponentType.BanterBrowser).RunActions(JSON.stringify({
+                        actions: [
+                            {
+                                actionType: "runscript",
+                                strParam1: fullscreenAndUnmute
+                            }
+                        ]
+                    }));
+                }, 2000); // Wait 2 seconds before running
+            } 
+            break;
+
+        case 'Info':
+            // console.log('Handling action for: More Info Button');
+            break;
+
+        case 'Google':
+            // console.log('Handling action for: Google Button');
+            break;
+
+        default:
+            // console.log('An unknown button triggered the custom event.');
+    }
 });
