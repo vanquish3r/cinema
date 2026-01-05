@@ -243,3 +243,112 @@ document.addEventListener('CustomButtonClick', async function(event) {
             // console.log('An unknown button triggered the custom event.');
     }
 });
+
+// FireScreen and YouTube Player Volume Controls
+const mediaControlScript = `
+(function() {
+    // --- Universal Media Control Function ---
+    // This function will be called from the Banter space to control media inside the browser.
+    window.fireScreenMediaControl = function(options) {
+        const { volume, mute } = options;
+
+        function controlMedia(doc) {
+            // 1. Find all standard HTML5 video and audio elements
+            doc.querySelectorAll('video, audio').forEach(el => {
+                try {
+                    if (volume !== undefined && 'volume' in el && !el.muted) {
+                        el.volume = volume;
+                    }
+                    if (mute !== undefined && 'muted' in el) {
+                        el.muted = mute;
+                    }
+                } catch (e) { /* console.error('[FireScreen] Error controlling HTML5 media:', e); */ }
+            });
+
+            // 2. Attempt to control common third-party players (e.g., YouTube)
+            const ytPlayer = doc.querySelector('.html5-video-player');
+            if (ytPlayer) {
+                try {
+                    if (volume !== undefined && typeof ytPlayer.setVolume === 'function') {
+                        ytPlayer.setVolume(volume * 100);
+                    }
+                    if (mute !== undefined) {
+                        if (mute && typeof ytPlayer.mute === 'function') ytPlayer.mute();
+                        if (!mute && typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+                    }
+                } catch(e) { /* console.error('[FireScreen] Error controlling YouTube player:', e); */ }
+            }
+
+            // 3. Recursively search within iframes
+            doc.querySelectorAll('iframe').forEach(iframe => {
+                try {
+                    if (iframe.contentDocument) controlMedia(iframe.contentDocument);
+                } catch (e) { /* Cross-origin iFrames will throw errors, which is expected. */ }
+            });
+        }
+        controlMedia(window.document);
+    };
+})();
+`;
+
+
+async function youtubePlayerControl(value, action = null) {
+    const core = window.videoPlayerCore; if (!core) return;
+    const methodName = (action === "mute" || action === "openPlaylist") ? action : "volume"; // Choose the method name based on the action.
+    if (typeof core[methodName] !== "function") return;  // Only call if it's a function.
+    return methodName === "volume" ? core[methodName](value) : core[methodName](); // Call with or without the value argument.
+};
+  
+
+function runBrowserActions(firebrowser, script) {
+  firebrowser.RunActions(JSON.stringify({"actions": [{ "actionType": "runscript","strparam1": script }]}));
+};
+
+
+function adjustForAll(action, change) {
+  // Iterate over all registered FireScreen instances
+  for (const instanceId in window.fireScreenInstances) {
+    const instance = window.fireScreenInstances[instanceId];
+    if (instance && instance.browserComponent) {
+      const thebrowserpart = instance.browserComponent;
+
+      switch (action) {
+        case "adjustVolume":
+          adjustVolume(thebrowserpart, change);
+          break;
+        case "toggleMute":
+          thebrowserpart.muteState = !thebrowserpart.muteState;
+          const scriptToRun = `${mediaControlScript} window.fireScreenMediaControl({ mute: ${thebrowserpart.muteState} });`;
+          runBrowserActions(thebrowserpart, scriptToRun);
+          break;
+      }
+      console.log(`adjustForAll: Action '${action}' applied to instance ${instanceId}`);
+    } else {
+      console.warn(`adjustForAll: Could not find browser instance ${instanceId}. It might have been cleaned up or not initialized correctly.`);
+    }
+  }
+}
+
+
+function adjustVolume(firebrowser, change) { // Pass -1 to decrease the volume Pass 1 to increase the volume
+  let firevolume = firebrowser.volumeLevel;
+  let currentVolume = Number(firevolume); let adjustment;
+  if (currentVolume < 0.1) { adjustment = 0.01; // Tiny adjustment for low volume
+  } else if (currentVolume < 0.5) { adjustment = 0.03; // Medium adjustment for medium volume
+  } else { adjustment = 0.05; } // Big adjustment for high volume
+
+  let newVolume = currentVolume + (change * adjustment);
+  newVolume = Math.max(0, Math.min(newVolume, 1)).toFixed(2);
+  firebrowser.volumeLevel = newVolume;
+
+  console.log(`FIRESCREEN2: Setting volume to: ${newVolume}`);
+  // Inject the control script and immediately execute the command.
+  const scriptToRun = `${mediaControlScript} window.fireScreenMediaControl({ volume: ${newVolume} });`;
+  runBrowserActions(firebrowser, scriptToRun);
+};
+
+/*
+adjustForAll("adjustVolume", 1); youtubePlayerControl(1);
+adjustForAll("adjustVolume", -1); youtubePlayerControl(0);
+adjustForAll("toggleMute"); youtubePlayerControl(null, "mute");
+*/
