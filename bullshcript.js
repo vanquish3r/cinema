@@ -99,7 +99,7 @@ function enableTheFireScreen() {
 				"mipmaps": "0",
 				"rotation": "0 0 0",
 				"screen-rotation": "0 0 0",
-				"screen-scale": "0.66 0.66 1",
+				"screen-scale": "0.67 0.67 1",
 				"position": "-18.2 0.6 1.451",
 				"lock-position": "true",
 				"hand-controls": "true",
