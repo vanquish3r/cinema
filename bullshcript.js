@@ -9,7 +9,7 @@ let youtubePlaylist = `PL24rMr-iJJ1LwIG3SPYtnJa3qd3O4F-oQ`;
 // let websiteurl = "https://sidequestvr.github.io/SideQuest.Banter.Spaces/screen-cast/?sid=42424242"; /* ?autoplay=1&controls=0 For YouTube Live */ 
 let otherwebsiteurl = "https://firer.at/pages/games.html";
 
-BS.BanterScene.GetInstance().On("loaded", () => {
+window.addEventListener("bs-loaded", ()=> {
  	console.log("Scene loaded");
 	/* UNCOMMENTED THIS TO ENABLE THE YOUTUBE PLAYER */
 		// enableYouTube();
