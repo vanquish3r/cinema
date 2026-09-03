@@ -227,7 +227,7 @@ document.addEventListener('CustomButtonClick', async function(event) {
                             }
                         ]
                     }));
-                }, 2000); // Wait 2 seconds before running
+                }, 4000); // Wait 4 seconds before running
             } 
             break;
 
