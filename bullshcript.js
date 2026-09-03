@@ -56,10 +56,10 @@ async function enableYouTube() {
 			console.log("YouTube Player Loading");
 
 			const youtubeAttributes = {
-				"scale": "1 1 1",
+				"scale": "1.01 1.01 1.01",
 				"mip-maps": "0",
 				"rotation": "0 0 0",
-				"position": "0.002 -5 0",
+				"position": "0 -5 0",
 				"hand-controls": "true",
 				"button-position": "-18.4 0.9 -1.45",
 				"volume": "5",
